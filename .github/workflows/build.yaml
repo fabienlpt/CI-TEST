@@ -10,8 +10,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '14'
-      - name: Cache node-modules
-        id: cache-node-modules
+      - name: Cache node_modules
+        id: cache-node_modules
         uses: actions/cache@v3
         with:
           path: node_modules
@@ -19,15 +19,17 @@ jobs:
       - run: |
           npm ci
           npm run build
-          
   test:
     runs-on: ubuntu-latest
     needs: [build]
+    strategy:
+      matrix:
+          browser: ['chrome', 'firefox', 'edge']
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Cache nodes-modules
-        id: cache-nodes-modules
+      - name: Cache node_modules
+        id: cache-node_modules
         uses: actions/cache@v3
         with:
           path: node_modules
@@ -37,13 +39,16 @@ jobs:
         uses: cypress-io/github-action@v4.2.0
         with:
           build: npm run build
-          start: npm start
-      - uses: actions/upload-artifact@v3
+          start: npm run start
+          browser: ${{ matrix.browser }}
+      - name: artifacts videos
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: cypress-videos
           path: cypress/videos
-      - uses: actions/upload-artifact@v3
+      - name: artifacts screenshots
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: cypress-screenshots
