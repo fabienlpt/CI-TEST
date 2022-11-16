@@ -10,4 +10,4 @@ jobs:
       - run: |
         npm install -g bats
         npm run build
-        ls -la
+        ls -lah
